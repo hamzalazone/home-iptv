@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home IPTV</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+<style>
+  body { font-family: system-ui, sans-serif; background: #111; color: #eee; margin: 0; padding: 1rem; }
+  video { width: 100%; max-width: 960px; background: #000; display: block; margin-bottom: 1rem; }
+  #channels { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  button { padding: 0.5rem 1rem; border: 1px solid #444; background: #222; color: #eee; border-radius: 4px; cursor: pointer; }
+  button.active { background: #e50914; border-color: #e50914; }
+</style>
+</head>
+<body>
+  <video id="player" controls autoplay muted playsinline></video>
+  <div id="channels">Caricamento canali...</div>
+
+<script>
+let currentHls = null;
+
+function playChannel(url, btn) {
+  document.querySelectorAll('#channels button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const video = document.getElementById('player');
+  if (currentHls) {
+    currentHls.destroy();
+    currentHls = null;
+  }
+  if (Hls.isSupported()) {
+    currentHls = new Hls();
+    currentHls.loadSource(url);
+    currentHls.attachMedia(video);
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = url;
+  }
+  video.play().catch(() => {});
+}
+
+async function loadChannels() {
+  const res = await fetch('/playlist.m3u');
+  const text = await res.text();
+  const lines = text.split('\n');
+  const channels = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith('#EXTINF')) {
+      const name = lines[i].split(',').slice(1).join(',');
+      const url = lines[i + 1];
+      if (url) channels.push({ name, url });
+    }
+  }
+
+  const list = document.getElementById('channels');
+  list.textContent = '';
+  if (channels.length === 0) {
+    list.textContent = 'Nessun canale configurato in channels.toml';
+    return;
+  }
+  channels.forEach((ch, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = ch.name;
+    btn.onclick = () => playChannel(ch.url, btn);
+    list.appendChild(btn);
+    if (i === 0) playChannel(ch.url, btn);
+  });
+}
+
+loadChannels();
+</script>
+</body>
+</html>

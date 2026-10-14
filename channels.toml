@@ -1,0 +1,32 @@
+# Ogni canale ha un id univoco (usato nell'URL), un nome visualizzato
+# e una playlist di file video locali riprodotti in loop.
+[[channels]]
+id = "demo"
+name = "Canale Demo"
+playlist = [
+    "media/demo1.mp4",
+]
+
+# Live: cattura una finestra specifica di Safari in tempo reale (video + audio
+# di sistema via BlackHole) invece di una playlist di file. window_title_contains
+# identifica QUALE finestra (tra le tante aperte) catturare per questo canale.
+# Più canali live possono coesistere: condividono un'unica cattura schermo
+# dietro le quinte (macOS ne permette una sola alla volta), ricomposta
+# dinamicamente in base a quali canali sono effettivamente richiesti.
+[[channels]]
+id = "live-wiki"
+name = "Live Wikipedia"
+capture_app = "Safari"
+window_title_contains = "Wikipedia"
+
+[[channels]]
+id = "live-example"
+name = "Live Example"
+capture_app = "Safari"
+window_title_contains = "Example Domain"
+
+[[channels]]
+id = "live-siiir"
+name = "Live Siiir"
+capture_app = "Safari"
+window_title_contains = "Siiir.tv"
